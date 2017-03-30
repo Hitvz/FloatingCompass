@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xxhui.space.floatingcompass.view.SimpleCompassConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/simple_viewgroup"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="xxhui.space.floatingcompass.MainActivity">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:elevation="4dp"
+            app:titleTextColor="@color/toolbar_title_color"
+            android:background="?attr/colorPrimary" />
+
+    <xxhui.space.floatingcompass.view.CompassView
+        android:id="@+id/compass"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5" />
+
+</xxhui.space.floatingcompass.view.SimpleCompassConstraintLayout>

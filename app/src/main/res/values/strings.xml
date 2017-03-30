@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">FloatingCompass</string>
+
+    <string name="bg_load">Switch Background</string>
+
+    <string name="reply">some advice</string>
+
+    <string name="float_">switch float mode</string>
+
+    <string name="exit_app">press again to exit APP</string>
+
+    <string name="man">manual</string>
+
+    <string name="man_body">
+        1.double click back key to exit APP\n
+        2.three click compass to enable to adjust the size\n
+        3.author：Hitvz  and you have some advice send e-mail to\n
+        3438343836@qq.com
+    </string>
+</resources>

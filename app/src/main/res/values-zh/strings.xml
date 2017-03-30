@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">悬浮指南针</string>
+
+    <string name="bg_load">切换背景</string>
+
+    <string name="float_">切换悬浮</string>
+
+    <string name="reply">问题反馈</string>
+
+    <string name="exit_app">再按一次退出程序</string>
+
+    <string name="man">说明</string>
+
+    <string name="man_body">
+        1.双击返回键退出程序\n
+        2.三击指南针图标以调节大小\n
+        3.作者：Hitvz\n
+        如果你有什么建议，可以发反馈邮件到3438343836@qq.com
+    </string>
+
+</resources>
