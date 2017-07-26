@@ -1,9 +1,18 @@
+
+# gradle目录
+.gradle/
+
+#IDEA IDE自动生成的目录
+.idea
 *.iml
-.gradle
-/local.properties
-/.idea/workspace.xml
-/.idea/libraries
+
+# 本地配置文件 (如：sdk路径)
+local.properties
+
+# OSX文件
 .DS_Store
-/build
-/captures
-.externalNativeBuild
+
+# APK忽略签名文件
+*.jks
+
+
