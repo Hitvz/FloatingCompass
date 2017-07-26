@@ -3,7 +3,7 @@
 .gradle/
 
 #IDEA IDE自动生成的目录
-.idea
+.idea/
 *.iml
 
 # 本地配置文件 (如：sdk路径)
