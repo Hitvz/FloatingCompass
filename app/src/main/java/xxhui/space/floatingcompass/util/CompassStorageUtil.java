@@ -22,6 +22,7 @@ public class CompassStorageUtil {
         this.context = context.getApplicationContext();
         SharedPreferences sharedPreferences = getSharedPreferences();
         preferences.setRadius(sharedPreferences.getFloat(CompassPreferences.KEY_RADIUS,300));
+        preferences.setBgStatus(sharedPreferences.getInt(CompassPreferences.KEY_BG,0));
         return preferences;
     }
 
@@ -34,6 +35,7 @@ public class CompassStorageUtil {
             editor.putFloat(CompassPreferences.KEY_RADIUS,preferences.getRadius());
             isPreferencesChange = true;
         }
+        editor.putInt(CompassPreferences.KEY_BG,preferences.getBgStatus());
         if(isPreferencesChange){
             editor.commit();
         }

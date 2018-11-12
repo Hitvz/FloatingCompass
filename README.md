@@ -12,6 +12,7 @@
 2. 使用自定义view绘制指南针，而不是使用图片
 3. 使用NoActionBar的theme，自己使用控件实现Toolbar，主要为兼容Android低版本机型
 4. 使用ConstraintLayout作为布局，重写onLayout和onDraw方法，用于绘制调节大小时的方框
+5. 保存指南針配置到SharePreferences
 
 ## 2、目录结构
 

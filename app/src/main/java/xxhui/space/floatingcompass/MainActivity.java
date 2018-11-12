@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import xxhui.space.floatingcompass.Module.CompassPreferences;
@@ -141,19 +142,40 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
         }
     }
 
-    private boolean isBlack = false;
+    private int bgStatus = 0;
+    private int preBgStatus = -1;
 
     private void switchBackground() {//切换背景
-        if (!isBlack) {
-            ViewGroup viewGroup = (ViewGroup) findViewById(R.id.simple_viewgroup);
-            viewGroup.setBackgroundColor(Color.BLACK);
-            toolbar.setBackgroundColor(Color.BLACK);
-        } else {
-            ViewGroup viewGroup = (ViewGroup) findViewById(R.id.simple_viewgroup);
-            viewGroup.setBackgroundColor(Color.WHITE);
-            toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+        if (preBgStatus == -1) {
+            switchBackground(1);
+            bgStatus = 1;
+            preBgStatus = 0;
+            return;
+        } else if (bgStatus == 1) {
+            switchBackground(0);
+            bgStatus = 0;
+        } else if (bgStatus == 0) {
+            switchBackground(1);
+            bgStatus = 1;
         }
-        isBlack = !isBlack;
+    }
+
+    private void switchBackground(int bgStatus) {//切换背景
+        ViewGroup viewGroup;
+        switch (bgStatus) {
+            case 0:
+                viewGroup = findViewById(R.id.simple_viewgroup);
+                viewGroup.setBackgroundColor(Color.WHITE);
+                toolbar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                break;
+            case 1:
+                viewGroup = findViewById(R.id.simple_viewgroup);
+                viewGroup.setBackgroundColor(Color.BLACK);
+                toolbar.setBackgroundColor(Color.BLACK);
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
@@ -197,6 +219,7 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
         if (!canUpdate) {//在结束调节大小的时候记录大小
             CompassPreferences preferences = new CompassPreferences();
             preferences.setRadius((compassView.getR() - compassView.getL()) / 2);
+            preferences.setBgStatus(bgStatus);
             mPresenter.writeCompassPreferences(preferences);
         }
         viewgroup.postInvalidate();
@@ -218,25 +241,31 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
         mPresenter.onThreeClick(event);
     }
 
-    class PreferencesTask extends AsyncTask<Void, Integer, Integer> {
+    class PreferencesTask extends AsyncTask<Void, Integer, CompassPreferences> {
         @Override
-        protected Integer doInBackground(Void... voids) {
-            int radius = (int) mPresenter.readCompassPreferences().getRadius();
+        protected CompassPreferences doInBackground(Void... voids) {
+            CompassPreferences preferences = mPresenter.readCompassPreferences();
+            int radius = (int) preferences.getRadius();
             int minSize = screenSize.getScreenHeight() > screenSize.getScreenWidth() ? screenSize.getScreenWidth() / 8 : screenSize.getScreenHeight() / 8;
             if (radius < minSize) {
-                radius = minSize;
+                preferences.setRadius(minSize);
             }
-            return radius;
+            return preferences;
         }
 
         @Override
-        protected void onPostExecute(Integer radius) {
+        protected void onPostExecute(CompassPreferences preferences) {
+            Float radius = preferences.getRadius();
             ViewGroup.LayoutParams params = compassView.getLayoutParams();
             params.width = radius.intValue() * 2;
             params.height = radius.intValue() * 2;
             compassView.setLayoutParams(params);
-            compassView.invalidate();
-            Toast.makeText(getApplicationContext(), "" + radius, Toast.LENGTH_LONG).show();
+            //compassView.invalidate();
+            if(preferences.getBgStatus()!=0) {
+                switchBackground(preferences.getBgStatus());
+                bgStatus = preferences.getBgStatus();
+                preBgStatus = 0;
+            }
         }
     }
 }

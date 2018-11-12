@@ -11,7 +11,20 @@ public class CompassPreferences {
 
     public static final String KEY_RADIUS = "radius";
 
+    public static final String KEY_BG = "bgStatus";
+
     private float radius = 300 ;//指南针半径
+
+    private int bgStatus = 0 ;//背景顔色
+
+
+    public int getBgStatus() {
+        return bgStatus;
+    }
+
+    public void setBgStatus(int bgStatus) {
+        this.bgStatus = bgStatus;
+    }
 
     public float getRadius() {
         return radius;
@@ -25,6 +38,7 @@ public class CompassPreferences {
     public String toString() {
         return "CompassPreferences{" +
                 "radius=" + radius +
+                ", bgStatus=" + bgStatus +
                 '}';
     }
 }
