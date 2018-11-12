@@ -8,11 +8,13 @@ import android.widget.Toast;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import xxhui.space.floatingcompass.Module.CompassPreferences;
 import xxhui.space.floatingcompass.R;
 import xxhui.space.floatingcompass.mvp.interfaces.CompassFunction;
 import xxhui.space.floatingcompass.mvp.abstracts.BasePresenter;
 import xxhui.space.floatingcompass.mvp.interfaces.MainPresenterFunction;
 import xxhui.space.floatingcompass.mvp.interfaces.MainViewEvent;
+import xxhui.space.floatingcompass.util.CompassStorageUtil;
 import xxhui.space.floatingcompass.util.CompassUtil;
 
 import static android.content.ContentValues.TAG;
@@ -30,6 +32,8 @@ public class CompassMainPresenter extends BasePresenter<MainViewEvent> implement
 
     private CompassFunction compassFunction;
 
+    private CompassStorageUtil storageUtil;
+
     public CompassMainPresenter(MainViewEvent view) {
         if (!isViewAttached()) {
             attachView(view);
@@ -37,6 +41,8 @@ public class CompassMainPresenter extends BasePresenter<MainViewEvent> implement
         compassFunction = new CompassFunctionImpl(this);
         compassUtil = new CompassUtil((AppCompatActivity) getView(), compassFunction);
         compassUtil.registerListener();//注册传感器
+        storageUtil = new CompassStorageUtil();
+
     }
 
     /**
@@ -94,7 +100,7 @@ public class CompassMainPresenter extends BasePresenter<MainViewEvent> implement
                 count = 0;
                 secondClick = System.currentTimeMillis();
                 if (secondClick - firstClick < 1000) {
-                    //双击事件
+                    //三击事件
                     getView().canUpdateSize();
                     Log.i(TAG, "doubleClick: ");
                 } else {
@@ -104,5 +110,16 @@ public class CompassMainPresenter extends BasePresenter<MainViewEvent> implement
             }
         }
     }
+
+    @Override
+    public CompassPreferences readCompassPreferences() {
+        return storageUtil.getPreferences((AppCompatActivity) getView());
+    }
+
+    @Override
+    public void writeCompassPreferences(CompassPreferences preferences) {
+        storageUtil.setPreferences((AppCompatActivity) getView(),preferences);
+    }
+
 
 }

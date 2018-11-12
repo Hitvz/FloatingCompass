@@ -21,7 +21,7 @@ public class CompassStorageUtil {
     public CompassPreferences getPreferences(Context context){
         this.context = context.getApplicationContext();
         SharedPreferences sharedPreferences = getSharedPreferences();
-        preferences.setRadius(sharedPreferences.getFloat("",400));
+        preferences.setRadius(sharedPreferences.getFloat(CompassPreferences.KEY_RADIUS,300));
         return preferences;
     }
 

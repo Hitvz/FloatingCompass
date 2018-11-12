@@ -3,7 +3,11 @@ package xxhui.space.floatingcompass;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -14,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import xxhui.space.floatingcompass.Module.CompassPreferences;
 import xxhui.space.floatingcompass.Module.ScreenSize;
 import xxhui.space.floatingcompass.interfaces.CompassDoubleListener;
 import xxhui.space.floatingcompass.interfaces.CompassSizeChangeListener;
@@ -34,6 +39,7 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
     private SimpleCompassConstraintLayout viewgroup;
     private Toolbar toolbar;
 
+
     private ScreenSize screenSize;
     //旋转compassView的辅助度数：记录前一次的度数
     private float preR;
@@ -44,6 +50,13 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
         setContentView(R.layout.activity_main);
         initView();
         screenSize = PhoneMSGUtil.getScreenSize(this);
+        handlePreferences();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
     }
 
     public void initView() {
@@ -53,6 +66,10 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
         compassView.setCompassSizeChangeListener(this);
         compassView.setCompassDoubleListener(this);
         viewgroup = findViewById(R.id.simple_viewgroup);
+    }
+
+    public void handlePreferences() {
+        new PreferencesTask().execute();
     }
 
     @Override
@@ -85,7 +102,6 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
                 switchFloat();
                 break;
             default:
-                showTip();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -94,8 +110,8 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
     /**
      * 展示提示的dialog
      */
-    private void showDialog(){
-        AlertDialog.Builder dialog =new AlertDialog.Builder(this);
+    private void showDialog() {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
         dialog.setView(R.layout.tip_layout);
         dialog.show();
     }
@@ -116,8 +132,8 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
                 this.canUpdateSize();
             }
             Intent intent = new Intent(MainActivity.this, CompassService.class);
-            intent.putExtra("width",compassView.getLayoutParams().width);
-            intent.putExtra("height",compassView.getLayoutParams().height);
+            intent.putExtra("width", compassView.getLayoutParams().width);
+            intent.putExtra("height", compassView.getLayoutParams().height);
             startService(intent);
             VibratorUtil.startVibrator(MainActivity.this, 100);
             compassView.setVisibility(View.GONE);
@@ -150,21 +166,21 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
     }
 
     private int minSize = 300;
+    private int maxSize = 0;
 
     @Override
     public void sizeChange(float size) {
         Log.i(TAG, "sizeChange: " + size);
+        if (maxSize == 0) {
+            maxSize = screenSize.getScreenWidth() > screenSize.getScreenHeight() ? screenSize.getScreenHeight() : screenSize.getScreenWidth();
+        }
         if (compassView.isSizeChange()) {
             ViewGroup.LayoutParams params = compassView.getLayoutParams();
-            if (params.width + size < minSize||params.height + size < minSize) {
+            float bound = params.width < params.height ? params.height + size : params.width + size;//取大的值
+            if (bound < minSize) {
                 params.width = minSize;
                 params.height = minSize;
-            } else {
-                params.width += size;
-                params.height += size;
-            }
-            int maxSize = screenSize.getScreenWidth()>screenSize.getScreenHeight()?screenSize.getScreenHeight():screenSize.getScreenWidth();
-            if (params.width + size > maxSize||params.height + size > maxSize) {
+            } else if (bound > maxSize) {
                 params.width = maxSize;
                 params.height = maxSize;
             } else {
@@ -177,7 +193,12 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
     }
 
     public void canUpdateSize() {
-        compassView.switchSizeChange();
+        boolean canUpdate = compassView.switchSizeChange();
+        if (!canUpdate) {//在结束调节大小的时候记录大小
+            CompassPreferences preferences = new CompassPreferences();
+            preferences.setRadius((compassView.getR() - compassView.getL()) / 2);
+            mPresenter.writeCompassPreferences(preferences);
+        }
         viewgroup.postInvalidate();
     }
 
@@ -197,28 +218,25 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
         mPresenter.onThreeClick(event);
     }
 
-    private int count = 0;
-    private long firstClick;
-    private long secondClick;
-
-    public void showTip() {
-        count++;
-        if (count == 1) {
-            firstClick = System.currentTimeMillis();
-        } else if (count == 2) {
-
-        } else if (count == 3) {
-            count = 0;
-            secondClick = System.currentTimeMillis();
-            if (secondClick - firstClick < 1000) {
-                //双击事件
-                Toast.makeText(this,"menu",Toast.LENGTH_SHORT).show();
-                Log.i(TAG, "doubleClick: ");
-            } else {
-                firstClick = System.currentTimeMillis();
-                count = 1;
+    class PreferencesTask extends AsyncTask<Void, Integer, Integer> {
+        @Override
+        protected Integer doInBackground(Void... voids) {
+            int radius = (int) mPresenter.readCompassPreferences().getRadius();
+            int minSize = screenSize.getScreenHeight() > screenSize.getScreenWidth() ? screenSize.getScreenWidth() / 8 : screenSize.getScreenHeight() / 8;
+            if (radius < minSize) {
+                radius = minSize;
             }
+            return radius;
         }
-        Log.i(TAG, "showTip: ");
+
+        @Override
+        protected void onPostExecute(Integer radius) {
+            ViewGroup.LayoutParams params = compassView.getLayoutParams();
+            params.width = radius.intValue() * 2;
+            params.height = radius.intValue() * 2;
+            compassView.setLayoutParams(params);
+            compassView.invalidate();
+            Toast.makeText(getApplicationContext(), "" + radius, Toast.LENGTH_LONG).show();
+        }
     }
 }

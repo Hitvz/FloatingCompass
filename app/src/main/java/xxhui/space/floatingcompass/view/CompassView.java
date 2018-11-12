@@ -484,10 +484,11 @@ public class CompassView extends View {
         Log.i(TAG, mParams.height + "setParams: " + mParams.width);
     }
 
-    public void switchSizeChange() {
+    public boolean switchSizeChange() {
         isSizeChange = !isSizeChange;
         Log.i(TAG, "switchSizeChange: before - " + isSizeChange);
         //postInvalidate();
+        return isSizeChange;
     }
 
 

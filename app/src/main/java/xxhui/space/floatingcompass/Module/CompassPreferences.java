@@ -11,7 +11,7 @@ public class CompassPreferences {
 
     public static final String KEY_RADIUS = "radius";
 
-    private float radius = 400 ;//指南针半径
+    private float radius = 300 ;//指南针半径
 
     public float getRadius() {
         return radius;
@@ -19,5 +19,12 @@ public class CompassPreferences {
 
     public void setRadius(float radius) {
         this.radius = radius;
+    }
+
+    @Override
+    public String toString() {
+        return "CompassPreferences{" +
+                "radius=" + radius +
+                '}';
     }
 }
