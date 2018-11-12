@@ -4,7 +4,8 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 
-import xxhui.space.floatingcompass.interfaces.CompassUpdateToView;
+import xxhui.space.floatingcompass.impl.ImpSensorEventListener;
+import xxhui.space.floatingcompass.mvp.interfaces.CompassFunction;
 
 
 /**
@@ -23,10 +24,10 @@ public class CompassUtil {
     private Sensor mSensor;//磁场传感器
     private ImpSensorEventListener listener;
 
-    public CompassUtil(Context context, CompassUpdateToView compassUpdateToView) {
+    public CompassUtil(Context context, CompassFunction compassFunction) {
         this.context = context.getApplicationContext();
         manager =  this.getSensorManager();
-        listener = new ImpSensorEventListener(compassUpdateToView);
+        listener = new ImpSensorEventListener(compassFunction);
     }
 
     private SensorManager getSensorManager(){

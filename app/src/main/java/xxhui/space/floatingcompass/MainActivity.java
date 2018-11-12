@@ -17,9 +17,9 @@ import android.widget.Toast;
 import xxhui.space.floatingcompass.Module.ScreenSize;
 import xxhui.space.floatingcompass.interfaces.CompassDoubleListener;
 import xxhui.space.floatingcompass.interfaces.CompassSizeChangeListener;
-import xxhui.space.floatingcompass.mvp.Imp.CompassPresenter;
+import xxhui.space.floatingcompass.mvp.Imp.CompassMainPresenter;
 import xxhui.space.floatingcompass.mvp.abstracts.MVPCompatActivity;
-import xxhui.space.floatingcompass.mvp.interfaces.ViewInterface;
+import xxhui.space.floatingcompass.mvp.interfaces.MainViewEvent;
 import xxhui.space.floatingcompass.service.CompassService;
 import xxhui.space.floatingcompass.util.PermissionUtil;
 import xxhui.space.floatingcompass.util.PhoneMSGUtil;
@@ -27,7 +27,7 @@ import xxhui.space.floatingcompass.util.VibratorUtil;
 import xxhui.space.floatingcompass.view.CompassView;
 import xxhui.space.floatingcompass.view.SimpleCompassConstraintLayout;
 
-public class MainActivity extends MVPCompatActivity<ViewInterface, CompassPresenter> implements ViewInterface, CompassSizeChangeListener, CompassDoubleListener {
+public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPresenter> implements MainViewEvent, CompassSizeChangeListener, CompassDoubleListener {
 
     private static final String TAG = "MainActivity";
     private CompassView compassView;
@@ -47,18 +47,18 @@ public class MainActivity extends MVPCompatActivity<ViewInterface, CompassPresen
     }
 
     public void initView() {
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        compassView = (CompassView) findViewById(R.id.compass);
+        compassView = findViewById(R.id.compass);
         compassView.setCompassSizeChangeListener(this);
         compassView.setCompassDoubleListener(this);
-        viewgroup = (SimpleCompassConstraintLayout) findViewById(R.id.simple_viewgroup);
+        viewgroup = findViewById(R.id.simple_viewgroup);
     }
 
     @Override
-    protected CompassPresenter createPresenter() {
+    protected CompassMainPresenter createPresenter() {
         //创建Presenter
-        return new CompassPresenter(this);
+        return new CompassMainPresenter(this);
     }
 
     //加载菜单项
@@ -75,7 +75,6 @@ public class MainActivity extends MVPCompatActivity<ViewInterface, CompassPresen
         Log.i(TAG, "onOptionsItemSelected: ");
         int id = item.getItemId();
         switch (id) {
-
             case R.id.switch_bg:
                 switchBackground();
                 break;
@@ -92,6 +91,9 @@ public class MainActivity extends MVPCompatActivity<ViewInterface, CompassPresen
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * 展示提示的dialog
+     */
     private void showDialog(){
         AlertDialog.Builder dialog =new AlertDialog.Builder(this);
         dialog.setView(R.layout.tip_layout);
@@ -139,7 +141,7 @@ public class MainActivity extends MVPCompatActivity<ViewInterface, CompassPresen
     }
 
     @Override
-    public void compassDegree(double resultValues) {
+    public void handleCompassDegree(double resultValues) {
         float temp = (float) -resultValues;
         if (Math.abs(preR - temp) > 0.8) {//提升程序稳定性，不会出现抖动
             ObjectAnimator.ofFloat(compassView, "rotation", preR, temp).setDuration(250).start();

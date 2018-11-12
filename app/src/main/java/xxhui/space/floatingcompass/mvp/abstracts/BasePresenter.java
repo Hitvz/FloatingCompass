@@ -7,6 +7,10 @@ import java.lang.ref.WeakReference;
  * Created by hui on 2017/3/6.
  */
 
+/**
+ * 逻辑操作的抽象
+ * @param <T> view的对象，用于操作view
+ */
 public abstract class BasePresenter<T> {
     protected Reference<T> mViewRef; //View接口类型的弱引用
 
