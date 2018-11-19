@@ -1,13 +1,20 @@
 package xxhui.space.floatingcompass;
 
 import android.animation.ObjectAnimator;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -27,6 +34,7 @@ import xxhui.space.floatingcompass.mvp.Imp.CompassMainPresenter;
 import xxhui.space.floatingcompass.mvp.abstracts.MVPCompatActivity;
 import xxhui.space.floatingcompass.mvp.interfaces.MainViewEvent;
 import xxhui.space.floatingcompass.service.CompassService;
+import xxhui.space.floatingcompass.util.NotificationUtil;
 import xxhui.space.floatingcompass.util.PermissionUtil;
 import xxhui.space.floatingcompass.util.PhoneMSGUtil;
 import xxhui.space.floatingcompass.util.VibratorUtil;
@@ -102,6 +110,11 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
                 break;
             case R.id.switch_float:
                 switchFloat();
+                if(!isFloat){
+                    NotificationUtil.undoNotify(getApplicationContext());
+                }else {
+                    NotificationUtil.doNotify(getApplicationContext());
+                }
                 break;
             default:
                 break;
@@ -269,4 +282,6 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
             }
         }
     }
+
+
 }
