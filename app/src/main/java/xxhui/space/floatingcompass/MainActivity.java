@@ -98,6 +98,7 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
                 break;
             case R.id.reply:
                 showDialog();
+                PermissionUtil.askForNotificationPermission(getApplicationContext());
                 break;
             case R.id.switch_float:
                 switchFloat();

@@ -15,4 +15,6 @@ local.properties
 # APK忽略签名文件
 *.jks
 
-
+# 忽略构建文件
+app/release/
+build/
