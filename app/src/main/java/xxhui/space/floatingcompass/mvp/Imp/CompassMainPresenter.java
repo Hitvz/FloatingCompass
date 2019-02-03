@@ -8,11 +8,13 @@ import android.widget.Toast;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import xxhui.space.floatingcompass.Module.CompassPreferences;
 import xxhui.space.floatingcompass.R;
-import xxhui.space.floatingcompass.interfaces.CompassUpdateToView;
+import xxhui.space.floatingcompass.mvp.interfaces.CompassFunction;
 import xxhui.space.floatingcompass.mvp.abstracts.BasePresenter;
-import xxhui.space.floatingcompass.mvp.interfaces.ViewFuntionInterface;
-import xxhui.space.floatingcompass.mvp.interfaces.ViewInterface;
+import xxhui.space.floatingcompass.mvp.interfaces.MainPresenterFunction;
+import xxhui.space.floatingcompass.mvp.interfaces.MainViewEvent;
+import xxhui.space.floatingcompass.util.CompassStorageUtil;
 import xxhui.space.floatingcompass.util.CompassUtil;
 
 import static android.content.ContentValues.TAG;
@@ -21,28 +23,41 @@ import static android.content.ContentValues.TAG;
  * Created by hui on 2017/3/22.
  */
 
-public class CompassPresenter extends BasePresenter<ViewInterface> implements CompassUpdateToView, ViewFuntionInterface {
+/**
+ * 指南针的操作，
+ */
+public class CompassMainPresenter extends BasePresenter<MainViewEvent> implements MainPresenterFunction {
 
     private CompassUtil compassUtil;
 
-    public CompassPresenter(ViewInterface view) {
+    private CompassFunction compassFunction;
+
+    private CompassStorageUtil storageUtil;
+
+    public CompassMainPresenter(MainViewEvent view) {
         if (!isViewAttached()) {
             attachView(view);
         }
-        compassUtil = new CompassUtil((AppCompatActivity) getView(), this);
-        compassUtil.registerListener();
+        compassFunction = new CompassFunctionImpl(this);
+        compassUtil = new CompassUtil((AppCompatActivity) getView(), compassFunction);
+        compassUtil.registerListener();//注册传感器
+        storageUtil = new CompassStorageUtil();
+
     }
 
-    @Override
+    /**
+     * 通过CompassUtil的ImpSensorEventListener將变化之值通知更新
+     * @param resultValues 返回compass的旋转角
+     */
     public void updateToView(double resultValues) {
-        getView().compassDegree(resultValues);
+        getView().handleCompassDegree(resultValues);
     }
 
 
     @Override
     public void detachView() {
         super.detachView();
-        compassUtil.unregisterListener();
+        compassUtil.unregisterListener();//注销传感器
     }
 
     private boolean mBackKeyPressed = false;
@@ -59,7 +74,7 @@ public class CompassPresenter extends BasePresenter<ViewInterface> implements Co
             }, 1000);
         } else {
             getView().finishActivity();
-            //System.exit(0);
+            System.exit(0);
         }
     }
 
@@ -85,7 +100,7 @@ public class CompassPresenter extends BasePresenter<ViewInterface> implements Co
                 count = 0;
                 secondClick = System.currentTimeMillis();
                 if (secondClick - firstClick < 1000) {
-                    //双击事件
+                    //三击事件
                     getView().canUpdateSize();
                     Log.i(TAG, "doubleClick: ");
                 } else {
@@ -95,5 +110,16 @@ public class CompassPresenter extends BasePresenter<ViewInterface> implements Co
             }
         }
     }
+
+    @Override
+    public CompassPreferences readCompassPreferences() {
+        return storageUtil.getPreferences((AppCompatActivity) getView());
+    }
+
+    @Override
+    public void writeCompassPreferences(CompassPreferences preferences) {
+        storageUtil.setPreferences((AppCompatActivity) getView(),preferences);
+    }
+
 
 }

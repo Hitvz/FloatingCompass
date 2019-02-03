@@ -1,37 +1,28 @@
-## Welcome to GitHub Pages
+应用链接：[悬浮指南针](http://shouji.baidu.com/software/11502324.html)
 
-You can use the [editor on GitHub](https://github.com/Hitvz/FloatingCompass/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+这是源码此应用源码
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+指南针部分是自定义view写出来
 
-### Markdown
+暂时还没时间写保存大小的功能
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+## 1、项目基本简介
 
-```markdown
-Syntax highlighted code block
+1. 项目使用MVP结构
+2. 使用自定义view绘制指南针，而不是使用图片
+3. 使用NoActionBar的theme，自己使用控件实现Toolbar，主要为兼容Android低版本机型
+4. 使用ConstraintLayout作为布局，重写onLayout和onDraw方法，用于绘制调节大小时的方框
+5. 保存指南針配置到SharePreferences
 
-# Header 1
-## Header 2
-### Header 3
+## 2、目录结构
 
-- Bulleted
-- List
+- --impl实现
+- --interfaces 接口声明
+- --module 实体类
+- --mvp mvp的结构抽象及实现
+- --service androidservice组件，实现浮窗时的功能逻辑
+- --util 辅助工具类
+- --view 自定义view及一些view的重写
+- --res --values 其中strings是默认英文适配 --values-zh 里面的strings是中文翻译
 
-1. Numbered
-2. List
 
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/Hitvz/FloatingCompass/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.

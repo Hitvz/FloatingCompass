@@ -1,11 +1,11 @@
-package xxhui.space.floatingcompass.util;
+package xxhui.space.floatingcompass.impl;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
-import xxhui.space.floatingcompass.interfaces.CompassUpdateToView;
+import xxhui.space.floatingcompass.mvp.interfaces.CompassFunction;
 
 
 /**
@@ -14,14 +14,14 @@ import xxhui.space.floatingcompass.interfaces.CompassUpdateToView;
  */
 
 public class ImpSensorEventListener implements SensorEventListener {
-    private CompassUpdateToView compassUpdateToView;
+    private CompassFunction compassFunction;
     private float[] gravityValues ;//重力向量值，通过SensorEvent得到；
     private float[] geomagneticValues;//磁场向量值，通过SensorEvent得到；
     private float[] R = new float[9];//或者R矩阵
     private float[] resultValues = new float[3];
 
-    public ImpSensorEventListener(CompassUpdateToView compassUpdateToView) {
-        this.compassUpdateToView = compassUpdateToView;
+    public ImpSensorEventListener(CompassFunction compassFunction) {
+        this.compassFunction = compassFunction;
     }
 
     /**
@@ -46,7 +46,7 @@ public class ImpSensorEventListener implements SensorEventListener {
         //经过SensorManager.getOrientation(R, values);得到的values值为弧度
         //转换为角度
         double values =Math.toDegrees(resultValues[0]);
-        compassUpdateToView.updateToView(values);
+        compassFunction.updateToView(values);
     }
 
     /**

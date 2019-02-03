@@ -10,7 +10,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 
-import xxhui.space.floatingcompass.interfaces.CompassUpdateToView;
+import xxhui.space.floatingcompass.mvp.interfaces.CompassFunction;
 import xxhui.space.floatingcompass.util.CompassUtil;
 import xxhui.space.floatingcompass.view.CompassView;
 
@@ -20,7 +20,7 @@ import static android.content.ContentValues.TAG;
  * Created by hui on 2017/1/18.
  */
 
-public class CompassService extends Service implements CompassUpdateToView {
+public class CompassService extends Service implements CompassFunction {
 
     private WindowManager windowManager;
     private WindowManager.LayoutParams params;
