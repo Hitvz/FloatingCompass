@@ -5,6 +5,7 @@
 #IDEA IDE自动生成的目录
 .idea/
 *.iml
+build/
 
 # 本地配置文件 (如：sdk路径)
 local.properties
