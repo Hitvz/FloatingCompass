@@ -1,20 +1,11 @@
 package xxhui.space.floatingcompass;
 
 import android.animation.ObjectAnimator;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Message;
-import android.support.v4.app.NotificationCompat;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -23,7 +14,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import xxhui.space.floatingcompass.Module.CompassPreferences;
@@ -106,13 +96,13 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
                 break;
             case R.id.reply:
                 showDialog();
-                PermissionUtil.askForNotificationPermission(getApplicationContext());
+                //PermissionUtil.askForNotificationPermission(getApplicationContext());
                 break;
             case R.id.switch_float:
                 switchFloat();
-                if(!isFloat){
+                if (!isFloat) {
                     NotificationUtil.undoNotify(getApplicationContext());
-                }else {
+                } else {
                     NotificationUtil.doNotify(getApplicationContext());
                 }
                 break;
@@ -255,6 +245,9 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
         mPresenter.onThreeClick(event);
     }
 
+    /**
+     * 配置文件读取
+     */
     class PreferencesTask extends AsyncTask<Void, Integer, CompassPreferences> {
         @Override
         protected CompassPreferences doInBackground(Void... voids) {
@@ -275,7 +268,7 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
             params.height = radius.intValue() * 2;
             compassView.setLayoutParams(params);
             //compassView.invalidate();
-            if(preferences.getBgStatus()!=0) {
+            if (preferences.getBgStatus() != 0) {
                 switchBackground(preferences.getBgStatus());
                 bgStatus = preferences.getBgStatus();
                 preBgStatus = 0;
@@ -283,5 +276,11 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
         }
     }
 
-
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == 4551) {
+            Toast.makeText(MainActivity.this, "亲，权限开启了~~", Toast.LENGTH_SHORT).show();
+            switchFloat();
+        }
+    }
 }

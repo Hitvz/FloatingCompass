@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator;
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 import android.view.Gravity;
@@ -62,6 +63,9 @@ public class CompassService extends Service implements CompassFunction {
 
        // params.type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;//这个是重点,error在锁屏之上，状态栏之上
         params.type = WindowManager.LayoutParams.TYPE_TOAST;//这个是重点,error在锁屏之下，状态栏之下，比较友好的展示。
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {//8.0新特性
+            params.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        }
         params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
         params.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;//要设置这个，其他应用才能正常使用物理菜单和返回键
         params.flags |= WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;// 透明状态栏
@@ -70,8 +74,6 @@ public class CompassService extends Service implements CompassFunction {
         compassUtil.registerListener();
         compassView = new CompassView(getApplicationContext());
         compassView.setParams(params);
-
-
         windowManager.addView(compassView, params);
         params.gravity = Gravity.LEFT | Gravity.TOP;//等窗口设置为居中显示后，设置为左上角为重心，不然其他重心都会出现偏移
     }
@@ -89,7 +91,7 @@ public class CompassService extends Service implements CompassFunction {
     @Override
     public void onDestroy() {
         compassUtil.unregisterListener();
-        compassView.setVisibility(View.GONE);//可见性设置为看不见，不让回残留自定义View
+        compassView.setVisibility(View.GONE);//可见性设置为看不见，不然会残留自定义View
         super.onDestroy();
     }
 

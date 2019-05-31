@@ -14,6 +14,8 @@ import android.widget.Toast;
 
 import java.lang.reflect.Method;
 
+import static android.app.Notification.EXTRA_CHANNEL_ID;
+
 /**
  * Created by hui on 2017/2/1.
  * 用于悬浮窗权限的检测与请求用户开启悬浮窗权限
@@ -62,7 +64,7 @@ public class PermissionUtil {
             if (!Settings.canDrawOverlays(context)) {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                         Uri.parse("package:" + context.getPackageName()));
-                ((AppCompatActivity) context).startActivityForResult(intent, 1234);
+                ((AppCompatActivity) context).startActivityForResult(intent, 4551);
             }
         }
     }
@@ -110,6 +112,8 @@ public class PermissionUtil {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 intent.setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
                 intent.putExtra(Settings.EXTRA_APP_PACKAGE, context.getPackageName());
+                intent.putExtra(EXTRA_CHANNEL_ID, context.getApplicationInfo().uid);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 intent.setAction(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
                 intent.putExtra("app_package", context.getPackageName());
