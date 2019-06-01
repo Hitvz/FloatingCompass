@@ -4,11 +4,21 @@
 
     <string name="bg_load">切换背景</string>
 
+    <string name="notify">通知权限</string>
+
     <string name="float_">切换悬浮</string>
 
     <string name="reply">问题反馈</string>
 
     <string name="exit_app">再按一次退出程序</string>
+
+    <string name="tip_floating_permission_on">亲，权限开启了~~</string>
+
+    <string name="tip_floating_permission_need_on">没有悬浮窗权限，需要开启权限</string>
+
+    <string name="notify_title_tip_function_on">已启用悬浮功能</string>
+
+    <string name="notify_text_tip_function_on">点击撤销悬浮，并回到App</string>
 
     <string name="man">说明</string>
 

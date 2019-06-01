@@ -5,6 +5,13 @@
     <group>
 
         <item
+            android:id="@+id/notify"
+            android:icon="@drawable/ic_notify_white"
+            android:title="@string/notify"
+            android:visible="false"
+            app:showAsAction="always" />
+
+        <item
             android:id="@+id/switch_bg"
             android:icon="@drawable/ic_switch_bg_white"
             android:title="@string/bg_load"

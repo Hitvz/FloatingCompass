@@ -2,11 +2,13 @@ package xxhui.space.floatingcompass;
 
 import android.animation.ObjectAnimator;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -37,6 +39,7 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
     private CompassView compassView;
     private SimpleCompassConstraintLayout viewgroup;
     private Toolbar toolbar;
+    MenuItem notify;//获得隐藏的通知菜单
 
 
     private ScreenSize screenSize;
@@ -48,6 +51,7 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);//设置屏幕旋转为始终竖屏
         screenSize = PhoneMSGUtil.getScreenSize(this);
         handlePreferences();
     }
@@ -82,6 +86,7 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
     public boolean onCreateOptionsMenu(Menu menu) {
         Log.i(TAG, "onCreateOptionsMenu: ");
         getMenuInflater().inflate(R.menu.compass_menu, menu);
+        notify = menu.findItem(R.id.notify);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -96,7 +101,6 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
                 break;
             case R.id.reply:
                 showDialog();
-                //PermissionUtil.askForNotificationPermission(getApplicationContext());
                 break;
             case R.id.switch_float:
                 switchFloat();
@@ -105,6 +109,9 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
                 } else {
                     NotificationUtil.doNotify(getApplicationContext());
                 }
+                break;
+            case R.id.notify:
+                PermissionUtil.askForNotificationPermission(getApplicationContext());
                 break;
             default:
                 break;
@@ -125,7 +132,7 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
 
     private void switchFloat() {
         if (!PermissionUtil.getAppOps(getApplicationContext())) {
-            Toast.makeText(MainActivity.this, "没有悬浮窗权限，需要开启权限", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, getResources().getString(R.string.tip_floating_permission_need_on), Toast.LENGTH_SHORT).show();
             PermissionUtil.askForPermission(MainActivity.this);
         }
         if (compassView.getVisibility() != View.VISIBLE) {
@@ -219,7 +226,10 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
     }
 
     public void canUpdateSize() {
-        boolean canUpdate = compassView.switchSizeChange();
+        boolean canUpdate = compassView.switchSizeChange();//更改指南针的可更新大小的标志位
+        if (notify != null) {
+            notify.setVisible(canUpdate);//更改大小时，可以设置通知栏权限
+        }
         if (!canUpdate) {//在结束调节大小的时候记录大小
             CompassPreferences preferences = new CompassPreferences();
             preferences.setRadius((compassView.getR() - compassView.getL()) / 2);
@@ -238,6 +248,13 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
     public void finishActivity() {
         this.finish();
         System.exit(0);
+    }
+
+    @Override
+    protected void onDestroy() {
+        switchFloat();
+        NotificationUtil.undoNotify(getApplicationContext());
+        super.onDestroy();
     }
 
     @Override
@@ -279,7 +296,7 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == 4551) {
-            Toast.makeText(MainActivity.this, "亲，权限开启了~~", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, getResources().getString(R.string.tip_floating_permission_on), Toast.LENGTH_SHORT).show();
             switchFloat();
         }
     }

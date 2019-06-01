@@ -3,11 +3,21 @@
 
     <string name="bg_load">Switch Background</string>
 
+    <string name="notify">notify permission</string>
+
     <string name="reply">some advice</string>
 
     <string name="float_">switch float mode</string>
 
     <string name="exit_app">press again to exit APP</string>
+
+    <string name="tip_floating_permission_on">hey! well done</string>
+
+    <string name="tip_floating_permission_need_on">floating permission not ready,try open it</string>
+
+    <string name="notify_title_tip_function_on">已启用悬浮功能</string>
+
+    <string name="notify_text_tip_function_on">点击撤销悬浮，并回到App</string>
 
     <string name="man">manual</string>
 

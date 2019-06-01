@@ -22,9 +22,8 @@ public class NotificationUtil {
                 R.drawable.ic_launcher_web);
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context, "1");
         mBuilder.setSmallIcon(R.drawable.ic_launcher_web);
-        mBuilder.setContentTitle("5 new message");
-        mBuilder.setContentText("twain@android.com");
-        mBuilder.setTicker("New message");//第一次提示消息的时候显示在通知栏上
+        mBuilder.setContentTitle(context.getResources().getString(R.string.notify_title_tip_function_on));
+        mBuilder.setContentText(context.getResources().getString(R.string.notify_text_tip_function_on));
         mBuilder.setNumber(12);
         mBuilder.setLargeIcon(btm);
         mBuilder.setAutoCancel(true);//自己维护通知的消失
