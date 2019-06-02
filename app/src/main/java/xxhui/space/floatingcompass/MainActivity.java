@@ -2,13 +2,11 @@ package xxhui.space.floatingcompass;
 
 import android.animation.ObjectAnimator;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -41,7 +39,6 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
     private Toolbar toolbar;
     MenuItem notify;//获得隐藏的通知菜单
 
-
     private ScreenSize screenSize;
     //旋转compassView的辅助度数：记录前一次的度数
     private float preR;
@@ -51,15 +48,19 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);//设置屏幕旋转为始终竖屏
         screenSize = PhoneMSGUtil.getScreenSize(this);
         handlePreferences();
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleIntent(intent);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
-
     }
 
     public void initView() {
@@ -69,6 +70,16 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
         compassView.setCompassSizeChangeListener(this);
         compassView.setCompassDoubleListener(this);
         viewgroup = findViewById(R.id.simple_viewgroup);
+    }
+
+    public void handleIntent(Intent intent){
+        if(intent==null){
+            intent = getIntent();
+        }
+        if(intent.getBooleanExtra("floatingReset",false)){
+            switchFloat();
+            NotificationUtil.undoNotify(getApplicationContext());
+        }
     }
 
     public void handlePreferences() {
@@ -246,15 +257,19 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
 
     @Override
     public void finishActivity() {
+        resourceClear();
         this.finish();
         System.exit(0);
     }
 
     @Override
     protected void onDestroy() {
-        switchFloat();
-        NotificationUtil.undoNotify(getApplicationContext());
+        resourceClear();
         super.onDestroy();
+    }
+
+    public void resourceClear(){
+        NotificationUtil.undoNotify(getApplicationContext());
     }
 
     @Override

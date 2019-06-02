@@ -11,8 +11,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.support.v4.app.NotificationCompat;
 
-import xxhui.space.floatingcompass.MainActivity;
+import java.util.Random;
+
 import xxhui.space.floatingcompass.R;
+import xxhui.space.floatingcompass.broadcast.FloatingResetReceiver;
 
 public class NotificationUtil {
 
@@ -24,20 +26,17 @@ public class NotificationUtil {
         mBuilder.setSmallIcon(R.drawable.ic_launcher_web);
         mBuilder.setContentTitle(context.getResources().getString(R.string.notify_title_tip_function_on));
         mBuilder.setContentText(context.getResources().getString(R.string.notify_text_tip_function_on));
-        mBuilder.setNumber(12);
         mBuilder.setLargeIcon(btm);
         mBuilder.setAutoCancel(true);//自己维护通知的消失
-        Notification notification = mBuilder.build();
-        notification.flags = Notification.FLAG_NO_CLEAR;//通知栏点击“清除”按钮时，该通知将不会被清除
-
         //构建一个Intent
-        Intent resultIntent = new Intent(context, MainActivity.class);
-        //封装一个Intent
+        Intent resultIntent =new Intent (context,FloatingResetReceiver.class);
         //如果构建的PendingIntent已经存在，则替换它
-        PendingIntent resultPendingIntent = PendingIntent.getActivity(context, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent resultPendingIntent = PendingIntent.getBroadcast(context, new Random().nextInt(100), resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         // 设置通知主题的意图
         mBuilder.setContentIntent(resultPendingIntent);
         //获取通知管理器对象
+        Notification notification = mBuilder.build();
+        notification.flags = Notification.FLAG_NO_CLEAR;//通知栏点击“清除”按钮时，该通知将不会被清除
         NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             //ChannelId为"1",ChannelName为"Channel1"

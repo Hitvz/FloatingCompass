@@ -20,6 +20,8 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".MainActivity"
+            android:screenOrientation="portrait"
+            android:launchMode="singleInstance"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,6 +30,11 @@
             </intent-filter>
         </activity>
         <service android:name=".service.CompassService"></service>
+        <receiver android:name=".broadcast.FloatingResetReceiver">
+            <intent-filter>
+                <action android:name="floatingReset"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
