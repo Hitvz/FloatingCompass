@@ -47,7 +47,23 @@ android {
         }
     }
     productFlavors {
+        baidu{}//百度
+        nineOne{}//91
+        androidMarket{}//安卓市场
     }
+
+    productFlavors.all{
+        flavor -> flavor.manifestPlaceholders = [InstallChannel: name]
+    }
+    flavorDimensions "default"
+
+}
+android.applicationVariants.all{
+    variant ->
+        variant.outputs.all {
+            //这里修改apk文件名
+            outputFileName = "${variant.applicationId}-v${variant.versionName}_${buildType.name}_${productFlavors[0].name}.apk"
+        }
 }
 
 dependencies {

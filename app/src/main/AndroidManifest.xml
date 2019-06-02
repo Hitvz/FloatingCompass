@@ -35,6 +35,7 @@
                 <action android:name="floatingReset"/>
             </intent-filter>
         </receiver>
+        <meta-data
+            android:name="InstallChannel" android:value="${InstallChannel}" />
     </application>
-
 </manifest>
