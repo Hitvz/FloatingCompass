@@ -26,10 +26,13 @@
 - --res --values 其中strings是默认英文适配 --values-zh 里面的strings是中文翻译
 
 ## 3、版本更新
+
 versionCode 1
 v1.0 悬浮指南针基本功能及国际化
+
 versionCode 2
 v2.0 更新代码目录结构、添加配置保存功能
+
 versionCode 3
 v2.1 增加通知权限开启菜单、点击通知则恢复app未悬浮时的状态、解决屏幕旋转bug
 
