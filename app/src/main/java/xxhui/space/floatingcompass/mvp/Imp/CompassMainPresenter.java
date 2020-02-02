@@ -8,7 +8,7 @@ import android.widget.Toast;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import xxhui.space.floatingcompass.Module.CompassPreferences;
+import xxhui.space.floatingcompass.module.CompassPreferences;
 import xxhui.space.floatingcompass.R;
 import xxhui.space.floatingcompass.mvp.interfaces.CompassFunction;
 import xxhui.space.floatingcompass.mvp.abstracts.BasePresenter;

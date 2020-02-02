@@ -1,4 +1,4 @@
-package xxhui.space.floatingcompass.Module;
+package xxhui.space.floatingcompass.module;
 
 /**
  * Created by hui on 2017/2/1.

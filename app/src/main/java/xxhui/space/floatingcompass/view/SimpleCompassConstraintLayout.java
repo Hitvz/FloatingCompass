@@ -30,13 +30,11 @@ public class SimpleCompassConstraintLayout extends ConstraintLayout {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-
         int widgetsCount = this.getChildCount();
         for(int i = 0; i < widgetsCount; ++i) {
             View child = this.getChildAt(i);
            if(child instanceof CompassView){
                compassView = (CompassView) child;
-               Log.i(TAG, "onLayout: "+i +" -- "+left + "--" + right);
            }
         }
     }
@@ -44,7 +42,6 @@ public class SimpleCompassConstraintLayout extends ConstraintLayout {
     @Override
     protected void onDraw(Canvas canvas) {
         if(compassView!=null){
-            //Log.i(TAG, "view group onDraw: not null");
             if(!compassView.isSizeChange()){
                 return;
             }
@@ -53,7 +50,6 @@ public class SimpleCompassConstraintLayout extends ConstraintLayout {
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeWidth(3);
             canvas.drawRect(compassView.getL(),compassView.getT(),compassView.getR(),compassView.getB(),paint);
-            //Log.i(TAG, "onDraw: end");
         }else {
             Log.i(TAG, "onDraw: null");
         }

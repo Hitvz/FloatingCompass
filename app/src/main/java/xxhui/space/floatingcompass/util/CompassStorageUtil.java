@@ -7,7 +7,7 @@ package xxhui.space.floatingcompass.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import xxhui.space.floatingcompass.Module.CompassPreferences;
+import xxhui.space.floatingcompass.module.CompassPreferences;
 
 /**
  * 存储应用配置
@@ -23,6 +23,7 @@ public class CompassStorageUtil {
         SharedPreferences sharedPreferences = getSharedPreferences();
         preferences.setRadius(sharedPreferences.getFloat(CompassPreferences.KEY_RADIUS,300));
         preferences.setBgStatus(sharedPreferences.getInt(CompassPreferences.KEY_BG,0));
+        preferences.setFloatingCloseAble(sharedPreferences.getBoolean(CompassPreferences.KEY_FLOATING_CLOSE_ABLE,false));
         return preferences;
     }
 
@@ -36,6 +37,7 @@ public class CompassStorageUtil {
             isPreferencesChange = true;
         }
         editor.putInt(CompassPreferences.KEY_BG,preferences.getBgStatus());
+        editor.putBoolean(CompassPreferences.KEY_FLOATING_CLOSE_ABLE,preferences.isFloatingCloseAble());
         if(isPreferencesChange){
             editor.commit();
         }

@@ -16,6 +16,7 @@ import java.lang.reflect.Field;
 
 import xxhui.space.floatingcompass.interfaces.CompassDoubleListener;
 import xxhui.space.floatingcompass.interfaces.CompassSizeChangeListener;
+import xxhui.space.floatingcompass.mvp.interfaces.CompassFunction;
 
 import static android.content.ContentValues.TAG;
 
@@ -42,10 +43,6 @@ public class CompassView extends View {
     private Paint sidePaint;//调节大小的边界边的画笔
 
     private String[] aText = {"N", "E", "S", "W"};
-    private int rotation = 0;
-    private long defaultDelay = 500;
-    private int preRotation;
-
     private int radius;
 
     /**
@@ -65,7 +62,7 @@ public class CompassView extends View {
 
     private CompassDoubleListener compassDoubleListener;
 
-
+    private CompassFunction compassFunction;
 
     /**
      * 记录系统状态栏的高度
@@ -85,14 +82,8 @@ public class CompassView extends View {
     //记录手指按下时在小悬浮窗的View上的横坐标的值
     private float xInView;
 
-    //在view中移动的横坐标值
-    private float xMoveInView;
-
     //记录手指按下时在小悬浮窗的View上的纵坐标的值
     private float yInView;
-
-    //在view中移动的纵坐标值
-    private float yMoveInView;
 
     /**
      * 记录当前手指位置在屏幕上的横坐标值
@@ -109,10 +100,18 @@ public class CompassView extends View {
      */
     private WindowManager.LayoutParams mParams;
 
-    /**
-     * 用于更新小悬浮窗的位置
-     */
+    //用于绘制指南针
     private WindowManager windowManager;
+
+    private int leftTopX;
+
+    private int leftTopY;
+
+    private int closeCircleRadius;
+
+    private boolean isWillCloseCircle;
+
+    private boolean isCloseLocation;
 
     public CompassView(Context context) {
         super(context);
@@ -240,27 +239,6 @@ public class CompassView extends View {
         }
     }
 
-    private void drawSide(Canvas canvas) {
-        if (!isSizeChange) {
-            Log.i(TAG, "drawSide: return");
-            return;
-        }
-        //safeRotate(canvas);
-        int size = viewHeight > viewWidth ? viewWidth : viewHeight;
-        canvas.drawRect(0, 0, size, size, sidePaint);
-
-    }
-
-    //修复-179跳到179的界面bug
-    private void safeRotate(Canvas canvas) {
-//        Log.i(TAG, "safeRotate: "+rotation);
-        int r = -rotation;
-        canvas.rotate(r, viewWidth / 2, viewHeight / 2);
-        if (r > 90 || r < -90) {
-            preRotation = r;
-        }
-    }
-
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -276,29 +254,12 @@ public class CompassView extends View {
             default:
                 break;
         }
-        //       if(willDraw) {
         int radius = Math.min(getWidth(), getHeight()) / 2;//求圆的半径，通过宽和高的小的一个值确定
         this.radius = radius;
-        //safeRotate(canvas);//必须先旋转再画其他才能达到动画效果，不让静止不动。
         drawCenterCircle(canvas, radius);
         drawText(canvas, radius);
         drawLineCircle(canvas, radius);
         drawNorthTriangle(canvas, radius);
-        //drawSide(canvas);
-        // postInvalidate();
-//            if(count==5) {
-//                willDraw = false;
-//            }
-//            count++;
-//        }
-//        Log.i(TAG, "onDraw: "+willDraw+count);
-
-    }
-
-    public void setRatation(int rotation) {
-        this.rotation = rotation;
-        //Log.i(TAG, "setRatation: set " + rotation);
-        // postInvalidateDelayed(defaultDelay);
     }
 
     @Override
@@ -322,21 +283,16 @@ public class CompassView extends View {
         int heightSpecSize = MeasureSpec.getSize(heightMeasureSpec);
         int desireWidth = widthSpecSize > heightSpecSize ? heightSpecSize : widthSpecSize;//正方形所以这样子
         int desireHeight = desireWidth;
-        //Log.i(TAG, "onMeasure: "+widthSpecSize + "---"+heightSpecSize);
         if (widthSpecMode == MeasureSpec.AT_MOST && heightSpecMode == MeasureSpec.AT_MOST) {//宽和高都指定为wrap_content,自己指定宽高
-            //setMeasuredDimension(defaultWidth, defaultHeight);
             desireWidth = defaultWidth;
             desireHeight = defaultHeight;
         } else if (widthSpecMode == MeasureSpec.AT_MOST) {//宽指定为wrap_content,自己指定
-            //setMeasuredDimension(defaultWidth, heightSpecSize);
             desireWidth = defaultWidth;
             desireHeight = defaultHeight;
         } else if (heightSpecMode == MeasureSpec.AT_MOST) {//高指定为wrap_content,自己指定高
-            //setMeasuredDimension(widthSpecSize, defaultHeight);
             desireWidth = defaultWidth;
             desireHeight = defaultHeight;
         }
-        //Log.i(TAG, "onMeasure: "+desireWidth + "---"+desireWidth);
         setMeasuredDimension(desireWidth, desireHeight);
     }
 
@@ -349,58 +305,44 @@ public class CompassView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if(compassDoubleListener!=null)
-        {
+        if (compassDoubleListener != null) {
             compassDoubleListener.onThreeClick(event);
-            if(isSizeChange){
-                //Log.i(TAG, "onTouchEvent: ");
+            if (isSizeChange) {
                 return viewSizeHandle(event);//必须return才能完成里面的逻辑
             }
         }
         if (this.mParams != null) {
             return viewDrawHandle(event);
         }
-
         return super.onTouchEvent(event);
     }
 
 
-
     private boolean viewSizeHandle(MotionEvent event) {
-        if(event.getPointerCount()!=2){
-            //Log.i(TAG, "viewSizeHandle: 2 finger");
-           // return false;
-        }
-        //Log.i(TAG, "viewSizeHandle: 1");
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
-                Log.i(TAG, "viewSizeHandle: down"+event.getActionIndex());
+                Log.i(TAG, "viewSizeHandle: down" + event.getActionIndex());
                 xInView = event.getX();
                 yInView = event.getY();
-                xMoveInView = xInView;
-                yMoveInView = yInView;
                 break;
             case MotionEvent.ACTION_MOVE:
-                if(event.getPointerCount()==2) {
-                    //Log.i(TAG, "onTouchEvent:0 x:"+event.getX(0)+" y:"+event.getY(0));
-                    //Log.i(TAG, "onTouchEvent:1 x:"+event.getX(1)+" y:"+event.getY(1));
-                    float xDis = event.getX(0)-event.getX(1);
-                    float yDis = event.getY(0)-event.getY(1);
-                    //Log.i(TAG, "onTouchEvent:* x:"+xDis+" y:"+yDis);
-                    updateViewSize((float) Math.sqrt(xDis*xDis+yDis+yDis));
+                if (event.getPointerCount() == 2) {
+                    float xDis = event.getX(0) - event.getX(1);
+                    float yDis = event.getY(0) - event.getY(1);
+                    updateViewSize((float) Math.sqrt(xDis * xDis + yDis + yDis));
                 }
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
-                Log.i(TAG, "viewSizeHandle: point down"+event.getActionIndex());
+                Log.i(TAG, "viewSizeHandle: point down" + event.getActionIndex());
                 break;
 
             case MotionEvent.ACTION_UP:
-                preDis =0 ;
-                Log.i(TAG, "viewSizeHandle: up"+event.getActionIndex());
+                preDis = 0;
+                Log.i(TAG, "viewSizeHandle: up" + event.getActionIndex());
                 break;
             case MotionEvent.ACTION_POINTER_UP:
-                Log.i(TAG, "viewSizeHandle: point up"+event.getActionIndex());
-            //case MotionEvent.ACTION_HOVER_MOVE
+                Log.i(TAG, "viewSizeHandle: point up" + event.getActionIndex());
+                //case MotionEvent.ACTION_HOVER_MOVE
             default:
                 break;
         }
@@ -409,15 +351,17 @@ public class CompassView extends View {
     }
 
     private float preDis;
+
     private void updateViewSize(float dis) {
-        if(preDis==0){
+        if (preDis == 0) {
             preDis = dis;
             return;
         }
         Log.i(TAG, "updateViewSize: ");
-        compassSizeChangeListener.sizeChange(dis-preDis);
+        compassSizeChangeListener.sizeChange(dis - preDis);
         preDis = dis;
     }
+
     private boolean viewDrawHandle(MotionEvent event) {
         Log.i(TAG, "viewDrawHandle: ");
         switch (event.getAction()) {
@@ -429,6 +373,10 @@ public class CompassView extends View {
                 yDownInScreen = event.getRawY();// - getStatusBarHeight();// 第一次按下y的值
                 xMoveInScreen = event.getRawX();// 第一次按下x的值
                 yMoveInScreen = event.getRawY();// - getStatusBarHeight();// 第一次按下y的值
+                if (compassFunction != null) {
+                    setTipColorPaint();
+                    compassFunction.closeCompass(event.getAction());
+                }
                 break;
             /**
              * 如果没有移动，就是下面的case MotionEvent.ACTION_MOVE没有执行，就会符合case
@@ -453,6 +401,10 @@ public class CompassView extends View {
                 if (xDownInScreen == xMoveInScreen && yDownInScreen == yMoveInScreen) {
                     //Log.i("up", "up");
                 }
+                if (compassFunction != null) {
+                    setDefaultColorPaint();
+                    compassFunction.closeCompass(event.getAction());
+                }
                 break;
             default:
                 break;
@@ -462,6 +414,7 @@ public class CompassView extends View {
 
 
     private int count = 0;
+
     /**
      * 更新小悬浮窗在屏幕中的位置。
      */
@@ -471,7 +424,14 @@ public class CompassView extends View {
         mParams.y = (int) (yMoveInScreen - yInView);
         //Log.i(TAG, mParams.x+" update "+mParams.y);
         windowManager.updateViewLayout(this, mParams);
-
+        if (isWillCloseCircle) {
+            isCloseLocation = yMoveInScreen > leftTopY && yMoveInScreen < leftTopY + closeCircleRadius * 2 && xMoveInScreen > leftTopX && xMoveInScreen < leftTopX + closeCircleRadius * 2;
+            if (isCloseLocation) {
+                setCloseColorPaint();
+            } else {
+                setTipColorPaint();
+            }
+        }
     }
 
     /**
@@ -544,4 +504,44 @@ public class CompassView extends View {
         this.compassDoubleListener = compassDoubleListener;
     }
 
+    public void setCompassFunction(CompassFunction compassFunction) {
+        this.compassFunction = compassFunction;
+    }
+
+    public void setCloseColorPaint() {
+        outterPaint.setColor(Color.argb(25, 255, 0, 0));
+        invalidate();
+    }
+
+    //设置ACTION_DOWN的画笔颜色，并刷新界面
+    public void setTipColorPaint() {
+        outterPaint.setColor(Color.argb(25, 0, 255, 140));
+        invalidate();
+    }
+
+    //设置ACTION_UP的画笔颜色，并刷新界面
+    public void setDefaultColorPaint() {
+        outterPaint.setColor(Color.argb(25, 0, 0, 0));
+        invalidate();
+    }
+
+    public void setLeftTopX(int leftTopX) {
+        this.leftTopX = leftTopX;
+    }
+
+    public void setLeftTopY(int leftTopY) {
+        this.leftTopY = leftTopY;
+    }
+
+    public void setCloseCircleRadius(int closeCircleRadius) {
+        this.closeCircleRadius = closeCircleRadius;
+    }
+
+    public void setWillCloseCircle(boolean willCloseCircle) {
+        isWillCloseCircle = willCloseCircle;
+    }
+
+    public boolean isCloseLocation() {
+        return isCloseLocation;
+    }
 }
