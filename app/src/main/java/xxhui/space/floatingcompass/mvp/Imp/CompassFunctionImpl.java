@@ -22,4 +22,9 @@ public class CompassFunctionImpl implements CompassFunction {
     public void updateToView(double resultValues) {
         presenter.updateToView(resultValues);
     }
+
+    @Override
+    public void closeCompass(int action) {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
 }

@@ -1,7 +1,9 @@
 package xxhui.space.floatingcompass;
 
 import android.animation.ObjectAnimator;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,10 +16,15 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import xxhui.space.floatingcompass.Module.CompassPreferences;
-import xxhui.space.floatingcompass.Module.ScreenSize;
+import com.suke.widget.SwitchButton;
+
+import xxhui.space.floatingcompass.broadcast.CloseCompassReceiver;
+import xxhui.space.floatingcompass.broadcast.FloatingResetReceiver;
+import xxhui.space.floatingcompass.module.CompassPreferences;
+import xxhui.space.floatingcompass.module.ScreenSize;
 import xxhui.space.floatingcompass.interfaces.CompassDoubleListener;
 import xxhui.space.floatingcompass.interfaces.CompassSizeChangeListener;
 import xxhui.space.floatingcompass.mvp.Imp.CompassMainPresenter;
@@ -28,6 +35,7 @@ import xxhui.space.floatingcompass.util.NotificationUtil;
 import xxhui.space.floatingcompass.util.PermissionUtil;
 import xxhui.space.floatingcompass.util.PhoneMSGUtil;
 import xxhui.space.floatingcompass.util.VibratorUtil;
+import xxhui.space.floatingcompass.view.CloseCompassView;
 import xxhui.space.floatingcompass.view.CompassView;
 import xxhui.space.floatingcompass.view.SimpleCompassConstraintLayout;
 
@@ -35,13 +43,21 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
 
     private static final String TAG = "MainActivity";
     private CompassView compassView;
-    private SimpleCompassConstraintLayout viewgroup;
+    private CloseCompassView closeCompassView;
+    private SimpleCompassConstraintLayout viewGroup;
     private Toolbar toolbar;
     MenuItem notify;//获得隐藏的通知菜单
+    private int statusBarHeight;//状态栏高度
 
     private ScreenSize screenSize;
     //旋转compassView的辅助度数：记录前一次的度数
     private float preR;
+
+    private BroadcastReceiver floatingResetReceiver;
+
+    private LinearLayout settingArea;
+
+    private SwitchButton floatingCloseCompassSetting;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +65,13 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
         setContentView(R.layout.activity_main);
         initView();
         screenSize = PhoneMSGUtil.getScreenSize(this);
+        getMaxSize();
         handlePreferences();
+        //注册关闭compass的广播
+        floatingResetReceiver = new CloseCompassReceiver(this);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("closeCompass");
+        registerReceiver(floatingResetReceiver, filter);
     }
 
     @Override
@@ -61,6 +83,7 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
     @Override
     protected void onResume() {
         super.onResume();
+        setCloseCompassViewSize();
     }
 
     public void initView() {
@@ -69,14 +92,25 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
         compassView = findViewById(R.id.compass);
         compassView.setCompassSizeChangeListener(this);
         compassView.setCompassDoubleListener(this);
-        viewgroup = findViewById(R.id.simple_viewgroup);
+        closeCompassView = findViewById(R.id.closeCompass);
+        viewGroup = findViewById(R.id.simple_viewgroup);
+        settingArea = findViewById(R.id.setting_area);
+        settingArea.setVisibility(View.GONE);
+        floatingCloseCompassSetting = findViewById(R.id.floating_close_compass_setting);
+        floatingCloseCompassSetting.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(SwitchButton view, boolean isChecked) {
+                closeCompassView.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+                floatingCloseAble = isChecked;
+            }
+        });
     }
 
-    public void handleIntent(Intent intent){
-        if(intent==null){
+    public void handleIntent(Intent intent) {
+        if (intent == null) {
             intent = getIntent();
         }
-        if(intent.getBooleanExtra("floatingReset",false)){
+        if (intent.getBooleanExtra("floatingReset", false)) {
             switchFloat();
             NotificationUtil.undoNotify(getApplicationContext());
         }
@@ -95,7 +129,6 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
     //加载菜单项
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        Log.i(TAG, "onCreateOptionsMenu: ");
         getMenuInflater().inflate(R.menu.compass_menu, menu);
         notify = menu.findItem(R.id.notify);
         return super.onCreateOptionsMenu(menu);
@@ -104,7 +137,6 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
     //逻辑框架
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Log.i(TAG, "onOptionsItemSelected: ");
         int id = item.getItemId();
         switch (id) {
             case R.id.switch_bg:
@@ -149,23 +181,33 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
         if (compassView.getVisibility() != View.VISIBLE) {
             stopService(new Intent(MainActivity.this, CompassService.class));
             compassView.setVisibility(View.VISIBLE);
+            closeCompassView.setVisibility(floatingCloseAble ? View.VISIBLE : View.GONE);
             isFloat = false;
         } else {
             if (compassView.isSizeChange()) {
                 this.canUpdateSize();
             }
+            statusBarHeight = PhoneMSGUtil.getStatusBarHeight(MainActivity.this, statusBarHeight);
             Intent intent = new Intent(MainActivity.this, CompassService.class);
             intent.putExtra("width", compassView.getLayoutParams().width);
             intent.putExtra("height", compassView.getLayoutParams().height);
+            intent.putExtra("leftTopX", (int) closeCompassView.getX());
+            intent.putExtra("leftTopY", (int) closeCompassView.getY());
+            intent.putExtra("closeCircleRadius", closeCompassView.getLayoutParams().width * 9 / 10 / 2);
+            intent.putExtra("closeCircleWidth", closeCompassView.getLayoutParams().width);
+            intent.putExtra("isWillCloseCircle", floatingCloseAble);
+            intent.putExtra("statusBarHeight", statusBarHeight);
             startService(intent);
             VibratorUtil.startVibrator(MainActivity.this, 100);
             compassView.setVisibility(View.GONE);
+            closeCompassView.setVisibility(View.GONE);
             isFloat = true;
         }
     }
 
     private int bgStatus = 0;
     private int preBgStatus = -1;
+    private boolean floatingCloseAble = false;//是否启用悬浮关闭区域
 
     private void switchBackground() {//切换背景
         if (preBgStatus == -1) {
@@ -212,12 +254,17 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
     private int minSize = 300;
     private int maxSize = 0;
 
+    public void getMaxSize() {
+        if (maxSize > 0) {
+            return;
+        }
+        maxSize = screenSize.getScreenWidth() > screenSize.getScreenHeight() ? screenSize.getScreenHeight() : screenSize.getScreenWidth();
+        setCloseCompassViewSize();
+    }
+
     @Override
     public void sizeChange(float size) {
-        Log.i(TAG, "sizeChange: " + size);
-        if (maxSize == 0) {
-            maxSize = screenSize.getScreenWidth() > screenSize.getScreenHeight() ? screenSize.getScreenHeight() : screenSize.getScreenWidth();
-        }
+        getMaxSize();
         if (compassView.isSizeChange()) {
             ViewGroup.LayoutParams params = compassView.getLayoutParams();
             float bound = params.width < params.height ? params.height + size : params.width + size;//取大的值
@@ -233,7 +280,14 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
             }
             compassView.setLayoutParams(params);
         }
-        Log.i(TAG, "sizeChange: " + size);
+    }
+
+    public void setCloseCompassViewSize() {
+        ViewGroup.LayoutParams params = closeCompassView.getLayoutParams();
+        int closeSize = maxSize / 6;
+        params.width = closeSize;
+        params.height = closeSize;
+        closeCompassView.setLayoutParams(params);
     }
 
     public void canUpdateSize() {
@@ -241,13 +295,15 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
         if (notify != null) {
             notify.setVisible(canUpdate);//更改大小时，可以设置通知栏权限
         }
+        settingArea.setVisibility(canUpdate ? View.VISIBLE : View.GONE);
         if (!canUpdate) {//在结束调节大小的时候记录大小
             CompassPreferences preferences = new CompassPreferences();
             preferences.setRadius((compassView.getR() - compassView.getL()) / 2);
             preferences.setBgStatus(bgStatus);
+            preferences.setFloatingCloseAble(floatingCloseAble);
             mPresenter.writeCompassPreferences(preferences);
         }
-        viewgroup.postInvalidate();
+        viewGroup.postInvalidate();
     }
 
     @Override
@@ -265,10 +321,13 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
     @Override
     protected void onDestroy() {
         resourceClear();
+        if (floatingResetReceiver != null) {
+            unregisterReceiver(floatingResetReceiver);
+        }
         super.onDestroy();
     }
 
-    public void resourceClear(){
+    public void resourceClear() {
         NotificationUtil.undoNotify(getApplicationContext());
     }
 
@@ -305,12 +364,15 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
                 bgStatus = preferences.getBgStatus();
                 preBgStatus = 0;
             }
+            floatingCloseAble = preferences.isFloatingCloseAble();
+            closeCompassView.setVisibility(floatingCloseAble ? View.VISIBLE : View.GONE);
+            floatingCloseCompassSetting.setChecked(floatingCloseAble);
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == 4551) {
+        if (requestCode == 4551) {//通知栏权限开启提示
             Toast.makeText(MainActivity.this, getResources().getString(R.string.tip_floating_permission_on), Toast.LENGTH_SHORT).show();
             switchFloat();
         }

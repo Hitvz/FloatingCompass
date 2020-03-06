@@ -6,7 +6,7 @@ import android.view.WindowManager;
 
 import java.lang.reflect.Field;
 
-import xxhui.space.floatingcompass.Module.ScreenSize;
+import xxhui.space.floatingcompass.module.ScreenSize;
 
 
 /**

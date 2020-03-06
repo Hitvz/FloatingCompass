@@ -2,7 +2,7 @@ package xxhui.space.floatingcompass.mvp.interfaces;
 
 import android.view.MotionEvent;
 
-import xxhui.space.floatingcompass.Module.CompassPreferences;
+import xxhui.space.floatingcompass.module.CompassPreferences;
 
 /**
  * Created by hui on 2017/3/25.

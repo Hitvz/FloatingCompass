@@ -10,4 +10,6 @@ public interface CompassFunction {
      * @param resultValues 返回compass的旋转角
      */
     void updateToView(double resultValues);
+
+    void closeCompass(int action);
 }
