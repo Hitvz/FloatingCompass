@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.UserHandle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,8 +15,6 @@ import xxhui.space.floatingcompass.mvp.interfaces.CompassFunction;
 import xxhui.space.floatingcompass.util.CompassUtil;
 import xxhui.space.floatingcompass.view.CloseCompassView;
 import xxhui.space.floatingcompass.view.CompassView;
-
-import static android.content.ContentValues.TAG;
 
 /**
  * Created by hui on 2017/1/18.
