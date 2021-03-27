@@ -1,5 +1,7 @@
 应用链接：[悬浮指南针](http://shouji.baidu.com/software/11502324.html)
 
+the google play link : [https://play.google.com/store/apps/details?id=xxhui.space.floatingcompass](https://play.google.com/store/apps/details?id=xxhui.space.floatingcompass)
+
 这是源码此应用源码
 
 指南针部分是自定义view写出来
