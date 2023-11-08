@@ -3,14 +3,14 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
     }
-    compileSdkVersion 29
-    buildToolsVersion '29.0.3'
+    namespace 'xxhui.space.floatingcompass'
+    compileSdk 33
     defaultConfig {
         applicationId "xxhui.space.floatingcompass"
-        minSdkVersion 15
-        targetSdkVersion 28
-        versionCode 4
-        versionName '2.2'
+        minSdk 19
+        targetSdkVersion 33
+        versionCode 5
+        versionName '2.3'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -19,8 +19,6 @@ android {
             buildConfigField "boolean", "LOG_DEBUG", "false"
             //混淆
             minifyEnabled true
-            //Zipalign优化
-            zipAlignEnabled true
             //打开资源压缩。
             shrinkResources true
             // 移除无用的resource文件
