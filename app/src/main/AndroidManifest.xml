@@ -3,11 +3,12 @@
 
     <uses-feature
         android:name="android.hardware.sensor.accelerometer"
-        android:required="false"></uses-feature>
+        android:required="false"/>
     <uses-feature
         android:name="android.hardware.sensor.compass"
-        android:required="false"></uses-feature>
-
+        android:required="false"/>
+    <!-- POST_NOTIFICATIONS权限是安卓13引入的通知权限 -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.VIBRATE"/>
 

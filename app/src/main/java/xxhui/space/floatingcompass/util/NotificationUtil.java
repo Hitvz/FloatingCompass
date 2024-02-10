@@ -9,7 +9,9 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.Build;
 import android.support.v4.app.NotificationCompat;
+import android.widget.Toast;
 
 import java.util.Random;
 
@@ -29,16 +31,20 @@ public class NotificationUtil {
         mBuilder.setLargeIcon(btm);
         mBuilder.setAutoCancel(true);//自己维护通知的消失
         //构建一个Intent
-        Intent resultIntent =new Intent (context,FloatingResetReceiver.class);
+        Intent resultIntent = new Intent(context, FloatingResetReceiver.class);
         //如果构建的PendingIntent已经存在，则替换它
-        PendingIntent resultPendingIntent = PendingIntent.getBroadcast(context, new Random().nextInt(100), resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        int notifyFlags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            notifyFlags = PendingIntent.FLAG_MUTABLE;
+        }
+        PendingIntent resultPendingIntent = PendingIntent.getBroadcast(context, new Random().nextInt(100), resultIntent, notifyFlags);
         // 设置通知主题的意图
         mBuilder.setContentIntent(resultPendingIntent);
         //获取通知管理器对象
         Notification notification = mBuilder.build();
         notification.flags = Notification.FLAG_NO_CLEAR;//通知栏点击“清除”按钮时，该通知将不会被清除
         NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             //ChannelId为"1",ChannelName为"Channel1"
             NotificationChannel channel = new NotificationChannel("1",
                     "Channel1", NotificationManager.IMPORTANCE_DEFAULT);
@@ -47,7 +53,16 @@ public class NotificationUtil {
             channel.setShowBadge(true); //是否在久按桌面图标时显示此渠道的通知
             mNotificationManager.createNotificationChannel(channel);
         }
-        mNotificationManager.notify(4551, notification);
+        boolean areNotificationsEnabled = true;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            areNotificationsEnabled = mNotificationManager.areNotificationsEnabled();
+        }
+        if (areNotificationsEnabled) {
+            mNotificationManager.notify(4551, notification);
+        } else {
+            String unableNotifyTip = context.getResources().getString(R.string.notify_unable);
+            Toast.makeText(context, unableNotifyTip, Toast.LENGTH_SHORT).show();
+        }
     }
 
     public static void undoNotify(Context context) {

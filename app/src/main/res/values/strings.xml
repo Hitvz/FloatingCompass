@@ -15,9 +15,11 @@
 
     <string name="tip_floating_permission_need_on">floating permission not ready,try open it</string>
 
-    <string name="notify_title_tip_function_on">已启用悬浮功能</string>
+    <string name="notify_title_tip_function_on">compass floating is open</string>
 
-    <string name="notify_text_tip_function_on">点击撤销悬浮，并回到App</string>
+    <string name="notify_text_tip_function_on">click to unable floating and back to app</string>
+
+    <string name="notify_unable">notification permission unable,not to notify</string>
 
     <string name="man">manual</string>
 

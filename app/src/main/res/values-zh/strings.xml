@@ -20,6 +20,8 @@
 
     <string name="notify_text_tip_function_on">点击撤销悬浮，并回到App</string>
 
+    <string name="notify_unable">没有开启通知权限，不弹出通知</string>
+
     <string name="man">说明</string>
 
     <string name="man_body">
