@@ -4,13 +4,13 @@ android {
     signingConfigs {
     }
     namespace 'xxhui.space.floatingcompass'
-    compileSdk 33
+    compileSdk 35
     defaultConfig {
         applicationId "xxhui.space.floatingcompass"
         minSdk 19
-        targetSdkVersion 33
-        versionCode 7
-        versionName '2.4.1'
+        targetSdkVersion 34
+        versionCode 9
+        versionName '2.4.2'
     }
     buildTypes {
         release {
