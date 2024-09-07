@@ -4,6 +4,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.util.Log;
 
 import xxhui.space.floatingcompass.mvp.interfaces.CompassFunction;
 
@@ -15,7 +16,7 @@ import xxhui.space.floatingcompass.mvp.interfaces.CompassFunction;
 
 public class ImpSensorEventListener implements SensorEventListener {
     private CompassFunction compassFunction;
-    private float[] gravityValues ;//重力向量值，通过SensorEvent得到；
+    private float[] gravityValues;//重力向量值，通过SensorEvent得到；
     private float[] geomagneticValues;//磁场向量值，通过SensorEvent得到；
     private float[] R = new float[9];//或者R矩阵
     private float[] resultValues = new float[3];
@@ -26,18 +27,19 @@ public class ImpSensorEventListener implements SensorEventListener {
 
     /**
      * 传感器值改变时调用
+     *
      * @param event
      */
     @Override
     public void onSensorChanged(SensorEvent event) {
         // TODO Auto-generated method stub
-        if(event.sensor.getType()==Sensor.TYPE_ACCELEROMETER){
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             gravityValues = event.values;
         }
-        if(event.sensor.getType()==Sensor.TYPE_MAGNETIC_FIELD){
+        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
             geomagneticValues = event.values;
         }
-        if(gravityValues==null||geomagneticValues==null){
+        if (gravityValues == null || geomagneticValues == null) {
             return;
         }
         //调用getRotaionMatrix获得变换矩阵R[]
@@ -45,17 +47,20 @@ public class ImpSensorEventListener implements SensorEventListener {
         SensorManager.getOrientation(R, resultValues);
         //经过SensorManager.getOrientation(R, values);得到的values值为弧度
         //转换为角度
-        double values =Math.toDegrees(resultValues[0]);
+        double values = Math.toDegrees(resultValues[0]);
         compassFunction.updateToView(values);
     }
 
     /**
      * 当一个传感器的准确性已经改变的时候调用。
-     * @param sensor
-     * @param accuracy
+     * note:精度小于3个都不可信
      */
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-
+        if (accuracy >= SensorManager.SENSOR_STATUS_ACCURACY_HIGH) {
+            Log.e("Compass", " 不需要校验");
+        } else {
+            Log.e("Compass", "需要校准 accuracy=" + accuracy);
+        }
     }
 }
