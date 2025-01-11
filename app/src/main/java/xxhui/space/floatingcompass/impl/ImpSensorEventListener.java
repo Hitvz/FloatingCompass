@@ -4,6 +4,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.util.Log;
 
 import xxhui.space.floatingcompass.mvp.interfaces.CompassFunction;
@@ -57,10 +58,13 @@ public class ImpSensorEventListener implements SensorEventListener {
      */
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
+            Log.i("Compass", "sensorType" + sensor.getStringType());
+        }
         if (accuracy >= SensorManager.SENSOR_STATUS_ACCURACY_HIGH) {
-            Log.e("Compass", " 不需要校验");
+            Log.i("Compass", " 不需要校验" + " sensorType" + sensor.getType());
         } else {
-            Log.e("Compass", "需要校准 accuracy=" + accuracy);
+            Log.i("Compass", "需要校准 accuracy=" + accuracy + " sensorType" + sensor.getType());
         }
     }
 }
