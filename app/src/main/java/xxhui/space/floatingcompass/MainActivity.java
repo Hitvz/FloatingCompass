@@ -43,7 +43,7 @@ import xxhui.space.floatingcompass.view.SimpleCompassConstraintLayout;
 
 public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPresenter> implements MainViewEvent, CompassSizeChangeListener, CompassDoubleListener {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "FcMainActivity";
     private CompassView compassView;
     private CloseCompassView closeCompassView;
     private SimpleCompassConstraintLayout viewGroup;
@@ -186,6 +186,7 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
             PermissionUtil.askForPermission(MainActivity.this);
         }
         if (compassView.getVisibility() != View.VISIBLE) {
+            Log.d(TAG, "switchFloat: 开始停止服务");
             stopService(new Intent(MainActivity.this, CompassService.class));
             compassView.setVisibility(View.VISIBLE);
             closeCompassView.setVisibility(floatingCloseAble ? View.VISIBLE : View.GONE);
@@ -204,6 +205,7 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
             intent.putExtra("closeCircleWidth", closeCompassView.getLayoutParams().width);
             intent.putExtra("isWillCloseCircle", floatingCloseAble);
             intent.putExtra("statusBarHeight", statusBarHeight);
+            Log.d(TAG, "switchFloat: 开始启动服务");
             startService(intent);
             VibratorUtil.startVibrator(MainActivity.this, 100);
             compassView.setVisibility(View.GONE);

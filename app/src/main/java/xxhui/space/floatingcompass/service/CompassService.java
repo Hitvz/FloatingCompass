@@ -62,7 +62,8 @@ public class CompassService extends Service implements CompassFunction {
         }
         windowManager = ((WindowManager) getSystemService(WINDOW_SERVICE));
         view();
-        return super.onStartCommand(intent, flags, startId);
+        //使用这个返回值时，服务被异常销毁，系统不会自动重启该服务
+        return START_NOT_STICKY;
     }
 
     private void view() {
