@@ -2,10 +2,12 @@ package xxhui.space.floatingcompass;
 
 import android.animation.ObjectAnimator;
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -71,7 +73,12 @@ public class MainActivity extends MVPCompatActivity<MainViewEvent, CompassMainPr
         floatingResetReceiver = new CloseCompassReceiver(this);
         IntentFilter filter = new IntentFilter();
         filter.addAction("closeCompass");
-        registerReceiver(floatingResetReceiver, filter);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            registerReceiver(floatingResetReceiver, filter, Context.RECEIVER_EXPORTED);
+        } else {
+            registerReceiver(floatingResetReceiver, filter);
+        }
     }
 
     @Override

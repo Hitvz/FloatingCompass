@@ -4,7 +4,7 @@ android {
     signingConfigs {
     }
     namespace 'xxhui.space.floatingcompass'
-    compileSdk 35
+    compileSdk 36
     defaultConfig {
         applicationId "xxhui.space.floatingcompass"
         minSdk 19
